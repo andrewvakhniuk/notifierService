@@ -1,0 +1,65 @@
+version: "3.5"
+
+services:
+    db:
+        image: mysql:8.0.23
+        platform: linux/x86_64
+        command: --default-authentication-plugin=mysql_native_password
+        volumes:
+            - "db_app:/var/lib/mysql"
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        ports:
+            - ${DB_PORT}:3306
+        networks:
+            - symfony
+        restart: always
+    php:
+        build:
+            context: .docker/php
+            args:
+                TIMEZONE: ${TIMEZONE}
+        volumes:
+            - ./app:/var/www/symfony
+            - ./app/var/log:/var/www/symfony/var/log
+        networks:
+            - symfony
+        restart: always
+    web:
+        build:
+            context: .docker/nginx
+        volumes:
+            - ./app/:/var/www/symfony/
+            - ./app/var/nginx_log:/var/log/nginx
+        ports:
+            - ${WEB_PORT}:80
+        networks:
+            - symfony
+        restart: always
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        environment:
+            PMA_HOST: db
+            PMA_USER: root
+            PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            UPLOAD_LIMIT: 52428800
+        ports:
+            - ${PHPMYADMIN_PORT:-8080}:80
+        depends_on:
+            - db
+        restart: always
+        logging:
+            driver: json-file
+            options:
+                max-size: "5m"
+                max-file: "2"
+        networks:
+            - symfony
+volumes:
+    db_app:
+
+networks:
+    symfony:
