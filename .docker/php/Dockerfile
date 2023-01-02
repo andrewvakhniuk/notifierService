@@ -21,6 +21,11 @@ RUN apt-get update && apt-get install -y \
     acl \
     && echo 'alias sf="php bin/console"' >> ~/.bashrc
 
+#Install AMPQ dependencies
+RUN apt-get install -y librabbitmq-dev
+RUN pecl install amqp
+RUN docker-php-ext-enable amqp
+
 RUN docker-php-ext-configure gd --with-jpeg --with-freetype 
 
 RUN docker-php-ext-install \

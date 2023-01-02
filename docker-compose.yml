@@ -8,15 +8,16 @@ services:
         volumes:
             - "db_app:/var/lib/mysql"
         environment:
-            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-            MYSQL_DATABASE: ${MYSQL_DATABASE}
-            MYSQL_USER: ${MYSQL_USER}
-            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+            MYSQL_DATABASE: ${MYSQL_DATABASE:-db}
+            MYSQL_USER: ${MYSQL_USER:-dev}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dev}
         ports:
             - ${DB_PORT}:3306
         networks:
             - symfony
         restart: always
+
     php:
         build:
             context: .docker/php
@@ -28,6 +29,7 @@ services:
         networks:
             - symfony
         restart: always
+
     web:
         build:
             context: .docker/nginx
@@ -39,6 +41,17 @@ services:
         networks:
             - symfony
         restart: always
+
+    rabbitmq:
+        image: rabbitmq:3-management
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        ports:
+            - 15672:15672
+        networks:
+            - symfony
+
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
         environment:
