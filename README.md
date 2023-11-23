@@ -1,3 +1,6 @@
+The service created using php, symfony framework. Notifier and Messenger bundles are used as a core for this notification service. This code was written as a testing assignemnt there is a big room for improvement or config changes. P.S. no tests implemented.
+
+
 # transfer_go_notification_service
 
 
